@@ -1,3 +1,5 @@
+use accurate::sum::NaiveSum;
+use accurate::traits::*;
 use fixedbitset::FixedBitSet;
 use itertools::Itertools;
 #[cfg(not(target_arch = "wasm32"))]
@@ -1541,7 +1543,7 @@ impl Tree {
         leaf_order.sort_by(|a, b| self.get(a).unwrap().name.cmp(&self.get(b).unwrap().name));
 
         let n = self.n_leaves();
-        let mut pairwise_vec = vec![0.0_f64; n * (n - 1) / 2];
+        let mut pairwise_vec = vec![NaiveSum::zero(); n * (n - 1) / 2];
 
         let leaf_idx_to_leaf_order = self
             .nodes
@@ -1628,7 +1630,7 @@ impl Tree {
                 .iter()
                 .map(|i| self.get(i).unwrap().clone().name.unwrap())
                 .collect_vec(),
-            pairwise_vec.iter().copied().collect_vec(),
+            pairwise_vec.iter().map(|v| v.sum()).collect_vec(),
         );
 
         Ok(matrix?)
