@@ -926,8 +926,8 @@ impl Tree {
                 .borrow()
                 .as_ref()
                 .unwrap()
-                .iter()
-                .map(|(k, _)| k.clone()),
+                .keys()
+                .cloned(),
         ))
     }
 
@@ -1717,7 +1717,6 @@ impl Tree {
             .nodes
             .iter()
             .filter(|node| !node.deleted && node.parent.is_some() && node.children.len() == 1)
-            .cloned()
             .map(|node| node.id)
             .collect();
 
