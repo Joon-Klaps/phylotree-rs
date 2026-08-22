@@ -4,10 +4,10 @@
 use std::{
     collections::{HashMap, HashSet},
     fmt::{Debug, Display},
-    fs,
-    path::Path,
     str::FromStr,
 };
+#[cfg(not(target_arch = "wasm32"))]
+use std::{fs, path::Path};
 
 use itertools::Itertools;
 use num_traits::{zero, Float, Zero};
@@ -147,7 +147,7 @@ where
             return Err(MatrixError::SizeError {
                 size: {
                     let delta = (8.0 * (n_pairs as f64) + 1.).sqrt() as usize;
-                    (delta + 1) / 2
+                    delta.div_ceil(2)
                 },
                 n_taxa: n,
             });
@@ -278,6 +278,7 @@ where
     }
 
     /// Writes the matrix to a phylip file
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn to_file(&self, path: &Path, square: bool) -> Result<(), MatrixError> {
         match fs::write(path, self.to_phylip(square)?) {
             Ok(_) => Ok(()),
@@ -366,7 +367,7 @@ where
         }
 
         let mut matrix = Self::new_with_size(size);
-        matrix.set_taxa(names.iter().cloned().map(|v| v.to_string()).collect_vec())?;
+        matrix.set_taxa(names.iter().map(|v| v.to_string()).collect_vec())?;
 
         let mut seen = HashSet::new();
 
@@ -418,6 +419,7 @@ where
     }
 
     /// Reads the matrix from a phylip file
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn from_file(path: &Path, square: bool) -> Result<Self, PhylipParseError<T>> {
         let newick_string = fs::read_to_string(path)?;
         Self::from_phylip_strict(&newick_string, square)

@@ -2,6 +2,7 @@ use accurate::sum::NaiveSum;
 use accurate::traits::*;
 use fixedbitset::FixedBitSet;
 use itertools::Itertools;
+#[cfg(not(target_arch = "wasm32"))]
 use ptree::{print_tree, TreeBuilder};
 use rand::seq::SliceRandom;
 use std::collections::VecDeque;
@@ -9,9 +10,9 @@ use std::iter::zip;
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
-    fs,
-    path::Path,
 };
+#[cfg(not(target_arch = "wasm32"))]
+use std::{fs, path::Path};
 use vec_map::VecMap;
 
 use thiserror::Error;
@@ -925,8 +926,8 @@ impl Tree {
                 .borrow()
                 .as_ref()
                 .unwrap()
-                .iter()
-                .map(|(k, _)| k.clone()),
+                .keys()
+                .cloned(),
         ))
     }
 
@@ -1716,7 +1717,6 @@ impl Tree {
             .nodes
             .iter()
             .filter(|node| !node.deleted && node.parent.is_some() && node.children.len() == 1)
-            .cloned()
             .map(|node| node.id)
             .collect();
 
@@ -2180,6 +2180,7 @@ impl Tree {
     }
 
     /// Writes the tree to a newick file
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn to_file(&self, path: &Path) -> Result<(), TreeError> {
         match fs::write(path, self.to_newick()?) {
             Ok(_) => Ok(()),
@@ -2188,6 +2189,7 @@ impl Tree {
     }
 
     /// Creates a tree from a newick file
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn from_file(path: &Path) -> Result<Self, NewickParseError> {
         let newick_string = fs::read_to_string(path)?;
         Self::from_newick(&newick_string)
@@ -2223,6 +2225,7 @@ END;
     }
 
     /// Recursive function that adds node representation to a printable tree builder
+    #[cfg(not(target_arch = "wasm32"))]
     fn print_nodes(
         &self,
         root_idx: &NodeId,
@@ -2250,6 +2253,7 @@ END;
     }
 
     /// Print a debug view of the tree to the console
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn print_debug(&self) -> Result<(), TreeError> {
         let root = self.get_root()?;
         let mut builder = TreeBuilder::new(format!("{:?}", root));
@@ -2262,6 +2266,7 @@ END;
     }
 
     /// Print the tree to the console
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn print(&self) -> Result<(), TreeError> {
         let root = self.get_root()?;
         let mut builder = TreeBuilder::new(format!("{:?}", root));
